@@ -38,6 +38,11 @@ dependencies:
   connectivity: ^3.0.6
   cloud_firestore: ^4.15.8
   firebase_database: ^10.4.9
+  image_picker: ^0.8.4+4
+  path_provider: 2.1.2
+  image: ^3.0.2
+  google_fonts: ^2.1.0
+  connectivity_plus: ^2.0.12
 
 dev_dependencies:
   flutter_test:

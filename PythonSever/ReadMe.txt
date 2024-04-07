@@ -1,3 +1,6 @@
+App.py is a REST API server that we send the gif as input to it, and it returns a JSON as a response.
+here is how the gif is converted into a json:
+
 what does my script do? 
 
 1) quantize all the frames.

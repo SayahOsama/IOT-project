@@ -3,6 +3,9 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
 
 class Page4 extends StatefulWidget {
   @override
@@ -12,12 +15,12 @@ class Page4 extends StatefulWidget {
 class _Page4State extends State<Page4> {
   File? _gif;
   String dropdownValue = 'None';
+  bool saveGif = false;
   final databaseReference = FirebaseDatabase.instance.ref();
-
 
   Future getGif() async {
     final pickedFile =
-        await ImagePicker().getVideo(source: ImageSource.gallery);
+        await ImagePicker().getImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       _gif = File(pickedFile.path);
@@ -29,8 +32,58 @@ class _Page4State extends State<Page4> {
     setState(() {});
   }
 
+    void sendData() async {
+      if (_gif == null) {
+    print('No image selected.');
+    return;
+  }
+    var url =
+        Uri.parse('https://matrix-server-bzr4.onrender.com/process'); // URL of your Flask API
 
-    void _showSelectedOption(BuildContext context) async {
+    var request = http.MultipartRequest('POST', url);
+    final imageData = await _gif!.readAsBytes();
+    final image = img.decodeImage(imageData);
+
+
+    request.files.add(await http.MultipartFile.fromPath(
+      'file',
+      _gif!.path,
+    ));
+
+    request.fields['size1'] = image!.width.toString();
+    request.fields['size2'] = image!.height.toString();
+
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      var result = json.decode(await response.stream.bytesToString());
+      print(result); // Print the result
+      try {
+      await databaseReference.child('Mode').set(2);
+      await databaseReference.child('image').set(result);
+    } catch (e) {
+      print('Failed to update data: $e');
+    }
+    } else {
+      print('Request failed with status: ${response.statusCode}.');
+    }
+  }
+
+  void sendDataToSendData() async {
+        var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+
+      print("connectivityResult is none in _printText() : page1  ");
+
+      // Show an error message or handle it appropriately
+    } else {
+      // Device is connected to the internet
+      sendData();
+    }
+  }
+
+
+  void _showSelectedOption(BuildContext context) async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.none) {
       // Device is not connected to the internet
@@ -38,7 +91,7 @@ class _Page4State extends State<Page4> {
       // setState() {
       //   connectionMethod = 'Connection Failed';
       // }
-          print("connectivityResult is none in _printText() : page1  ");
+      print("connectivityResult is none in _printText() : page1  ");
 
       // Show an error message or handle it appropriately
     } else {
@@ -49,7 +102,7 @@ class _Page4State extends State<Page4> {
     }
   }
 
-    void _sendData(String data) async {
+  void _sendData(String data) async {
     try {
       await databaseReference.child('GifName').set(data);
     } catch (e) {
@@ -59,9 +112,45 @@ class _Page4State extends State<Page4> {
 
 
 
-  void doSomething() {
-    // Your code here
-  }
+  Future<void> showSaveGifDialog() async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Save GIF'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text('Do you want to save the GIF?'),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Yes'),
+            onPressed: () {
+              saveGif = true;
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: Text('No'),
+            onPressed: () {
+              saveGif = false;
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void onDisplayGifButtonPressed() async {
+  await showSaveGifDialog();
+  sendDataToSendData();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -106,27 +195,28 @@ class _Page4State extends State<Page4> {
             SizedBox(height: 20),
             ElevatedButton(
               child: Text('Display GIF'),
-              onPressed: doSomething,
+              onPressed: onDisplayGifButtonPressed,
             ),
-Padding(
-  padding: EdgeInsets.symmetric(horizontal: 50.0), // Adjust as needed
-  child: Stack(
-    children: <Widget>[
-      Divider(
-        color: Colors.grey, // Adjust as needed
-        height: 50,
-        thickness: 2.0, // Adjust as needed
-      ),
-      Positioned(
-        left: 0,
-        right: 0,
-        child: Container(
-          color: Colors.white,
-        ),
-      ),
-    ],
-  ),
-),
+            Padding(
+              padding:
+                  EdgeInsets.symmetric(horizontal: 50.0), // Adjust as needed
+              child: Stack(
+                children: <Widget>[
+                  Divider(
+                    color: Colors.grey, // Adjust as needed
+                    height: 50,
+                    thickness: 2.0, // Adjust as needed
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             DropdownButtonHideUnderline(
               child: ButtonTheme(
                 alignedDropdown: true,

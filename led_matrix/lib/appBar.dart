@@ -37,14 +37,14 @@ class _CustomAppBarState extends State<CustomAppBar> {
     });
   }
 
-  List<String> pageDescriptions = [
-    'Description for page 1',
-    'Description for page 2',
-    'Description for page 3',
-    'Description for page 4',
-    'Description for page 5'
-  ];
-
+//TODO : add descriptions for each page.
+List<String> pageDescriptions = [
+  "Custom Text Page\n\nWrite down your custom text to display it on the matrix.\n\n",
+  "Upload Image Page\n\nUpload an image from your device.\nClick on the '+' to preview the image, and click 'Show Image' to display it on the matrix.\n\n",
+  "Idle Page\n\nHere you can set the brightness of the matrix using the slide.\nClick 'Set Brightness' to adjust the matrix’s brightness and display the time and date.\n\n",
+  "Upload GIF Page\n\nChoose between uploading your own GIF by clicking the '+', or select a GIF to display from a given set of options.\nClick 'Display GIF' to show the chosen GIF.\n\n",
+  "Snake Game Page\n\nTo start a game, click 'Start Game' at the top of the page.\nUse the arrows or the touchpad to determine the direction.\n\n"
+];
 
 
 

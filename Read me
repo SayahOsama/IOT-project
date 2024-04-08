@@ -1,1 +1,24 @@
-github repositry for our IOT project.
+#LED Matrix
+
+This innovative LED Matrix project, developed by Zenab Asi, Osama Sayah, and Kareem Ismail, presents a dynamic platform for a multitude of applications including displaying text, images, GIFs, and real-time clock functionality.
+It's a fusion of hardware and software expertise that results in captivating visual experiences.
+
+Overview:
+
+The LED Matrix is an interactive display system powered by ESP32, featuring two main components:
+
+Phone Application: The dedicated mobile app provides users with seamless control over the LED Matrix, offering four distinct modes:
+
+-Text Mode: Allows users to send text messages for display on the LED Matrix in real-time.
+-Image Mode: Enables users to transmit images from their mobile devices to be displayed on the LED Matrix.
+-GIF Mode: Provides the functionality to showcase animated GIFs on the LED Matrix screen.
+-Clock Mode: Utilizes the LED Matrix to display the current time, providing a functional and aesthetic addition to any space.
+
+buttons:
+the matrix has two main modes that can be controlled with buttons.
+____________________________________________________________________________________________________________________________________
+The names and versions of the libraries we worked with ESP32
+
+
+
+____________________________________________________________________________________________________________________________________

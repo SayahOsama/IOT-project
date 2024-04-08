@@ -12,9 +12,6 @@ app = Flask(__name__)
 
 # size = 32,32
 NUM_LEDS = 1024
-colors = []
-height = None
-width = None
 gamma8 = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
@@ -53,7 +50,7 @@ def compress_frames(frames):
 
 
 # check if the color is in the colors list.
-def colors_exists(color):
+def colors_exists(color,colors):
     for i in range(len(colors)):
         if (colors[i] == color):
             return True
@@ -61,7 +58,7 @@ def colors_exists(color):
 
 
 # return index of the color in the colors list.
-def mapped_colors(color):
+def mapped_colors(color,colors):
     for i in range(len(colors)):
         if (colors[i] == color):
             return i
@@ -77,7 +74,7 @@ def delete_indetical_colors(prev_frame, frame):
 
 # replace every interval that has the same colors as neighbours with [color,start_index,length] such as color is the index of color in the colors list,
 # start_index is the start index of the interval and length is the number of neighbours with identical colors in the interval.
-def compress_identical_pixel_colors(frame):
+def compress_identical_pixel_colors(frame,colors):
     res_frame = []
     if len(frame) > 0 and frame[0] != -1:
         length = 1
@@ -91,10 +88,10 @@ def compress_identical_pixel_colors(frame):
     for i in range(1, len(frame)):
         if (frame[i] == -1):
             if (length > 0):
-                res_frame.append([mapped_colors(curr_color), start_index, length])
+                res_frame.append([mapped_colors(curr_color,colors), start_index, length])
             length = 0
             continue
-        if not colors_exists(frame[i]):
+        if not colors_exists(frame[i],colors):
             colors.append(frame[i])
 
         if (length == 0):
@@ -105,20 +102,20 @@ def compress_identical_pixel_colors(frame):
             if (frame[i] == curr_color):
                 length = length + 1
             else:
-                res_frame.append([mapped_colors(curr_color), start_index, length])
+                res_frame.append([mapped_colors(curr_color,colors), start_index, length])
                 length = 1
                 curr_color = frame[i]
                 start_index = i
     if (length > 0):
-        res_frame.append([mapped_colors(curr_color), start_index, length])
+        res_frame.append([mapped_colors(curr_color,colors), start_index, length])
     return res_frame
 
 
 # calls compress_frames(frames) and then calls compress_identical_pixel_colors for each frame and returns.
-def compress_gif(frames):
+def compress_gif(frames,colors):
     compressed_frames = compress_frames(frames)
     for i in range(len(compressed_frames)):
-        compressed_frames[i] = compress_identical_pixel_colors(compressed_frames[i])
+        compressed_frames[i] = compress_identical_pixel_colors(compressed_frames[i],colors)
     return compressed_frames
 
 
@@ -127,6 +124,9 @@ def convert_image_to_json(im, size):
     # Open image file
     # im = Image.open(input_file_path)
     # If it is 'GIF', then the file is a GIF
+    height = None
+    width = None
+    colors = []
     gif = False
     if im.format == 'GIF':
         gif = True
@@ -176,7 +176,7 @@ def convert_image_to_json(im, size):
         # frames.append(frame)
         frame = []
 
-    compressed_frames = compress_gif(frames)
+    compressed_frames = compress_gif(frames,colors)
     frame_sizes = []
     for i in range(len(compressed_frames)):
         frame_sizes.append(len(compressed_frames[i]))
@@ -189,7 +189,6 @@ def convert_image_to_json(im, size):
 
 @app.route('/process', methods=['POST'])
 def process_image():
-    print("got here")
     if 'file' not in request.files:
         return jsonify({"status": "error", "message": "No file part"}), 400
     

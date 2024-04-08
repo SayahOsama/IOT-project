@@ -39,7 +39,7 @@ class _Page1State extends State<Page1> {
 
     void _sendTextData(String data) async {
     try {
-      await databaseReference.child('Mode').set(1);
+      await databaseReference.child('Mode').set(9);
       await databaseReference.child('TextToShow').set(data);
     } catch (e) {
       print('Failed to update data: $e');
@@ -67,7 +67,7 @@ class _Page1State extends State<Page1> {
           SizedBox(height: 20),
           ElevatedButton(
             onPressed: () =>_printText(context),
-            child: Text('Send Text', style: TextStyle(fontSize: 20)),
+            child: Text('Send Text', style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 62, 101, 120))),
           ),
         ],
       ),

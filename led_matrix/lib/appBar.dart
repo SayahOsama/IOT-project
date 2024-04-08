@@ -1,6 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:connectivity/connectivity.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'dart:async';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -16,19 +18,44 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _CustomAppBarState extends State<CustomAppBar> {
+    final databaseReference = FirebaseDatabase.instance.ref();
+
   late Stream<ConnectivityResult> connectivityStream;
   ConnectivityResult? previousResult;
   ConnectivityResult? realPrev ;
   bool hide = true;
+  Timer? _timer;
+  late Timer _timerEsp;
+  late Timer _timerApp;
 
   @override
+  // void initState() {
+  //   super.initState();
+  //   connectivityStream = Connectivity().onConnectivityChanged;
+  //    initConnectivity();
+  // }
+  //   void initState() {
+  //   super.initState();
+  //   connectivityStream = Connectivity().onConnectivityChanged;
+  //   initConnectivity();
+  //   _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+  //     updateConnectionStatus();
+  //   });
+  // }
   void initState() {
-    super.initState();
-    connectivityStream = Connectivity().onConnectivityChanged;
-     initConnectivity();
-  }
+  super.initState();
+  connectivityStream = Connectivity().onConnectivityChanged;
+  initConnectivity();
+  _timerEsp = Timer.periodic(Duration(seconds: 10), (timer) {
+    updateConnectionStatus();
+  });
+  _timerApp = Timer.periodic(Duration(seconds: 3), (timer) {
+    updateAppConnectedStatus();
+  });
+}
 
-  Future<void> initConnectivity() async {
+
+    Future<void> initConnectivity() async {
     ConnectivityResult result = await Connectivity().checkConnectivity();
     setState(() {
       realPrev = previousResult;
@@ -37,6 +64,32 @@ class _CustomAppBarState extends State<CustomAppBar> {
     });
   }
 
+
+  void updateAppConnectedStatus() {
+  final isConnected = previousResult != ConnectivityResult.none;
+  databaseReference.child('AppConnected').set(isConnected);
+}
+void updateConnectionStatus() async{
+
+  DatabaseEvent event = await databaseReference.child('Esp32Connected').once();
+    bool isEspConnected = event.snapshot.value as bool;
+if (!isEspConnected) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('ESP is not connected'),
+      duration: Duration(seconds: 5),
+    ),
+  );
+} else {
+  databaseReference.child('Esp32Connected').set(true);
+}
+    }
+    @override
+void dispose() {
+  super.dispose();
+  _timerEsp?.cancel();
+  _timerApp?.cancel();
+}
 //TODO : add descriptions for each page.
 List<String> pageDescriptions = [
   "Custom Text Page\n\nWrite down your custom text to display it on the matrix.\n\n",
@@ -104,14 +157,6 @@ List<String> pageDescriptions = [
                 previousResult = snapshot.data;
               }
               if (previousResult == ConnectivityResult.wifi ) {
-                //                 WidgetsBinding.instance!.addPostFrameCallback((_) {
-                //   ScaffoldMessenger.of(context).showSnackBar(
-                //     SnackBar(
-                //       content: Text('Connected to Wi-Fi'),
-                //       duration: Duration(seconds: 3),
-                //     ),
-                //   );
-                // });
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Icon(

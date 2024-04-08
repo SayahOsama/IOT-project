@@ -6,17 +6,23 @@ import 'package:http/http.dart' as http;
 import 'package:connectivity/connectivity.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:image/image.dart' as img;
+import 'dart:async';
+
 
 final picker = ImagePicker();
+
+  List<String> savedNames=[];
 
 class Page2 extends StatefulWidget {
   @override
   _Page2State createState() => _Page2State();
 }
 
+File? _image;
+
 class _Page2State extends State<Page2> {
-  File? _image;
   bool saveImage = false;
+  String imageName="";
   final databaseReference = FirebaseDatabase.instance.ref();
 
   Future getImage() async {
@@ -49,17 +55,46 @@ class _Page2State extends State<Page2> {
     final image = img.decodeImage(imageData);
 
 
-    request.fields['size1'] = image!.width.toString();
-    request.fields['size2'] = image!.height.toString();
+    request.fields['size1'] = "32";
+    request.fields['size2'] = "32";
 
     var response = await request.send();
 
     if (response.statusCode == 200) {
-      var result = json.decode(await response.stream.bytesToString());
+      var completer = Completer<String>();
+      var contents = StringBuffer();
+      response.stream.transform(utf8.decoder).listen(
+        (data) {
+          contents.write(data);
+        },
+        onDone: () {
+          completer.complete(contents.toString());
+        },
+        onError: (error) {
+          completer.completeError(error);
+        },
+      );
+      var resString = await completer.future;
+      var result = json.decode(resString);
+      // var resString=await response.stream.bytesToString();
+      // var result = json.decode(resString);
       print(result); // Print the result
       try {
-      await databaseReference.child('Mode').set(2);
+      await databaseReference.child('dynamicString').set(resString);
+      await databaseReference.child('save').set(saveImage);
       await databaseReference.child('image').set(result);
+      await databaseReference.child('savedName').set(imageName);
+      await databaseReference.child('Mode').set(7);
+      if(saveImage){
+  // Read the current value
+  DatabaseEvent event = await databaseReference.child('files').once();
+  String currentFiles = event.snapshot.value as String;
+
+  // Append the new string
+String updatedFiles = "$currentFiles${imageName.isNotEmpty ? ', $imageName' : ''}";
+  // Write the updated value back to the database
+  await databaseReference.child('files').set(updatedFiles);
+}
     } catch (e) {
       print('Failed to update data: $e');
     }
@@ -82,40 +117,79 @@ class _Page2State extends State<Page2> {
   }
 
 
-    Future<void> showSaveImageDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Save Image'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Do you want to save the image?'),
-              ],
-            ),
+Future<void> showSaveImageDialog() async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Save Image'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text('Do you want to save the image?'),
+            ],
           ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Yes'),
-              onPressed: () {
-                saveImage = true;
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('No'),
-              onPressed: () {
-                saveImage = false;
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Yes'),
+            onPressed: () {
+              saveImage = true;
+              Navigator.of(context).pop();
+              showDialog(
+                context: context,
+                barrierDismissible: false, // user must tap button!
+                builder: (BuildContext context) {
+                  final _formKey = GlobalKey<FormState>();
+                  return AlertDialog(
+                    title: Text('Enter Image name'),
+                    content: Form(
+                      key: _formKey,
+                      child: TextFormField(
+                        onChanged: (value) {
+                          imageName = value;
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a name';
+                          } else if (savedNames.contains(value)) {
+                            return 'This name already exists';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: Text('Save'),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            setState(() {
+                              savedNames.add(imageName);
+                            });
+                            Navigator.of(context).pop();
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+          TextButton(
+            child: Text('No'),
+            onPressed: () {
+              saveImage = false;
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 
     void onDisplayImageButtonPressed() async {
     await showSaveImageDialog();
@@ -129,45 +203,47 @@ class _Page2State extends State<Page2> {
         title: Text(''),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Upload Image', style: TextStyle(fontSize: 20)),
-            SizedBox(height: 20),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              height: 250,
-              width: 250,
-              child: Stack(
-                children: <Widget>[
-                  if (_image != null)
-                    Opacity(
-                      opacity: 0.5,
-                      child: Image.file(
-                        _image!,
-                        width: 250,
-                        height: 250,
-                        fit: BoxFit.cover,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text('Upload Image', style: TextStyle(fontSize: 20)),
+              SizedBox(height: 20),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                height: 250,
+                width: 250,
+                child: Stack(
+                  children: <Widget>[
+                    if (_image != null)
+                      Opacity(
+                        opacity: 0.5,
+                        child: Image.file(
+                          _image!,
+                          width: 250,
+                          height: 250,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    Center(
+                      child: IconButton(
+                        icon: Icon(Icons.add, size: 50),
+                        onPressed: getImage,
                       ),
                     ),
-                  Center(
-                    child: IconButton(
-                      icon: Icon(Icons.add, size: 50),
-                      onPressed: getImage,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              child: Text('Display Image'),
-              onPressed: onDisplayImageButtonPressed,
-            ),
-          ],
+              SizedBox(height: 20),
+              ElevatedButton(
+                child: Text('Display Image', style: TextStyle(fontSize: 17, color: Color.fromARGB(255, 62, 101, 120))),
+                onPressed: onDisplayImageButtonPressed,
+              ),
+            ],
+          ),
         ),
       ),
     );

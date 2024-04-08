@@ -29,7 +29,6 @@ class _Page5State extends State<Page5> {
       // Show an error message or handle it appropriately
     } else {
       // Device is connected to the internet
-      databaseReference.child('Mode').set(5);
       print('Selected option: $move');
       _sendData(move);
     }
@@ -37,7 +36,7 @@ class _Page5State extends State<Page5> {
 
   void _sendData(int data) async {
     try {
-      await databaseReference.child('mode').set(5);
+      databaseReference.child('Mode').set(11);
       await databaseReference.child('snakeGame/moves/$size').set(data);
       size++;
     } catch (e) {
@@ -62,8 +61,8 @@ Widget build(BuildContext context) {
       children: <Widget>[
         Center(
           child: ElevatedButton.icon(
-            icon: Icon(Icons.play_arrow),
-            label: Text('Start Game'),
+            icon: Icon(Icons.play_arrow, color: Color.fromARGB(255, 62, 101, 120)),
+            label: Text('Start Game',style: TextStyle(fontSize: 17, color: Color.fromARGB(255, 62, 101, 120))),
             onPressed: _resetGame,
           ),
         ),

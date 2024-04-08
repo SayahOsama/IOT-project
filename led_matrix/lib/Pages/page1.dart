@@ -29,7 +29,6 @@ class _Page1State extends State<Page1> {
     } else {
       // Device is connected to the internet
 
-      databaseReference.child('Mode').set(1);
       print(myController.text);
       // TextToShow=myController.text;
       _sendTextData(myController.text);
@@ -39,8 +38,8 @@ class _Page1State extends State<Page1> {
 
     void _sendTextData(String data) async {
     try {
-      await databaseReference.child('Mode').set(9);
       await databaseReference.child('TextToShow').set(data);
+      await databaseReference.child('Mode').set(9);
     } catch (e) {
       print('Failed to update data: $e');
     }

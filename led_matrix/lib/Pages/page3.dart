@@ -39,8 +39,8 @@ class _Page3State extends State<Page3> {
 
     void _sendToggleData() async {
     try {
-      await databaseReference.child('Mode').set(10);
       await databaseReference.child('switch').set(_isOn);
+      await databaseReference.child('Mode').set(10);
     } catch (e) {
       print('Failed to update Brightness: $e');
     }
@@ -71,8 +71,8 @@ class _Page3State extends State<Page3> {
 
   void _sendBrightnessData(double data) async {
     try {
-      await databaseReference.child('Mode').set(12);
       await databaseReference.child('Brightness').set(data.floor());
+      await databaseReference.child('Mode').set(12);
     } catch (e) {
       print('Failed to update Brightness: $e');
     }

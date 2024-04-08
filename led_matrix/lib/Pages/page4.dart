@@ -67,11 +67,12 @@ class _Page4State extends State<Page4> {
     request.fields['size1'] = "32";
     request.fields['size2'] = "32";
 
-
     var response = await request.send();
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    print(
+        "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     print(response);
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    print(
+        "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     if (response.statusCode == 200) {
       var completer = Completer<String>();
       var contents = StringBuffer();
@@ -95,22 +96,24 @@ class _Page4State extends State<Page4> {
         await databaseReference.child('save').set(saveGif);
         await databaseReference.child('savedName').set(gifName);
         await databaseReference.child('Mode').set(6);
-if(saveGif){
-  // Read the current value
-  DatabaseEvent event = await databaseReference.child('files').once();
-  String currentFiles = event.snapshot.value as String;
+        if (saveGif) {
+          // Read the current value
+          DatabaseEvent event = await databaseReference.child('files').once();
+          String currentFiles = event.snapshot.value as String;
 
-  // Append the new string
-String updatedFiles = "$currentFiles${gifName.isNotEmpty ? ', $gifName' : ''}";
-  // Write the updated value back to the database
-  await databaseReference.child('files').set(updatedFiles);
-}
+          // Append the new string
+          String updatedFiles =
+              "$currentFiles${gifName.isNotEmpty ? ', $gifName' : ''}";
+          // Write the updated value back to the databasef
+          await databaseReference.child('files').set(updatedFiles);
+        }
       } catch (e) {
         print('Failed to update data: $e');
       }
     } else {
       print('Request failed with status: ${response.statusCode}.');
     }
+    saveGif = false;
   }
 
   void sendDataToSendData() async {
@@ -152,82 +155,165 @@ String updatedFiles = "$currentFiles${gifName.isNotEmpty ? ', $gifName' : ''}";
       print('Failed to update data: $e');
     }
   }
-
   Future showSaveGifDialog() async {
-    final _formKey = GlobalKey<FormState>();
-    return showDialog(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Save GIF'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: [
-                Text('Do you want to save the GIF?'),
-              ],
-            ),
+  final _formKey = GlobalKey<FormState>();
+  final completer = Completer();  // Create a Completer
+
+  showDialog(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Save GIF'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: [
+              Text('Do you want to save the GIF?'),
+            ],
           ),
-          actions: [
-            TextButton(
-              child: Text('Yes'),
-              onPressed: () {
-                saveGif = true;
-                Navigator.of(context).pop();
-                showDialog(
-                  context: context,
-                  barrierDismissible: false, // user must tap button!
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text('Enter GIF name'),
-                      content: Form(
-                        key: _formKey,
-                        child: Flexible(
-                          child: TextFormField(
-                            onChanged: (value) {
-                              gifName = value;
-                            },
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter a name';
-                              } else if (savedNames.contains(value)) {
-                                return 'This name already exists';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ),
-                      actions: [
-                        TextButton(
-                          child: Text('Save'),
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              setState(() {
-                                savedNames.add(gifName);
-                              });
-                              Navigator.of(context).pop();
+        ),
+        actions: [
+          TextButton(
+            child: Text('Yes'),
+            onPressed: () async {
+              saveGif = true;
+              Navigator.of(context).pop();
+              await showDialog(
+                context: context,
+                barrierDismissible: false, // user must tap button!
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Enter GIF name'),
+                    content: Form(
+                      key: _formKey,
+                      child: Flexible(
+                        child: TextFormField(
+                          onChanged: (value) {
+                            gifName = value;
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a name';
+                            } else if (savedNames.contains(value)) {
+                              return 'This name already exists';
                             }
+                            return null;
                           },
                         ),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
-            TextButton(
-              child: Text('No'),
-              onPressed: () {
-                saveGif = false;
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        child: Text('Save'),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            saveGif = true;
+                            setState(() {
+                              savedNames.add(gifName);
+                            });
+                            Navigator.of(context).pop();
+                            completer.complete();  // Complete the Future
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+          TextButton(
+            child: Text('No'),
+            onPressed: () {
+              saveGif = false;
+              Navigator.of(context).pop();
+              completer.complete();  // Complete the Future
+            },
+          ),
+        ],
+      );
+    },
+  );
+
+  return completer.future;  // Return the Future
+}
+
+  // Future showSaveGifDialog() async {
+  //   final _formKey = GlobalKey<FormState>();
+  //   return showDialog(
+  //     context: context,
+  //     barrierDismissible: false, // user must tap button!
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text('Save GIF'),
+  //         content: SingleChildScrollView(
+  //           child: ListBody(
+  //             children: [
+  //               Text('Do you want to save the GIF?'),
+  //             ],
+  //           ),
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             child: Text('Yes'),
+  //             onPressed: () async {
+  //               saveGif = true;
+  //               Navigator.of(context).pop();
+  //               await showDialog(
+  //                 context: context,
+  //                 barrierDismissible: false, // user must tap button!
+  //                 builder: (BuildContext context) {
+  //                   return AlertDialog(
+  //                     title: Text('Enter GIF name'),
+  //                     content: Form(
+  //                       key: _formKey,
+  //                       child: Flexible(
+  //                         child: TextFormField(
+  //                           onChanged: (value) {
+  //                             gifName = value;
+  //                           },
+  //                           validator: (value) {
+  //                             if (value == null || value.isEmpty) {
+  //                               return 'Please enter a name';
+  //                             } else if (savedNames.contains(value)) {
+  //                               return 'This name already exists';
+  //                             }
+  //                             return null;
+  //                           },
+  //                         ),
+  //                       ),
+  //                     ),
+  //                     actions: [
+  //                       TextButton(
+  //                         child: Text('Save'),
+  //                         onPressed: () async {
+  //                           if (_formKey.currentState!.validate()) {
+  //                             saveGif = true;
+  //                             setState(() {
+  //                               savedNames.add(gifName);
+  //                             });
+  //                             Navigator.of(context).pop();
+  //                           }
+  //                         },
+  //                       ),
+  //                     ],
+  //                   );
+  //                 },
+  //               );
+  //             },
+  //           ),
+  //           TextButton(
+  //             child: Text('No'),
+  //             onPressed: () {
+  //               saveGif = false;
+  //               Navigator.of(context).pop();
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   void onDisplayGifButtonPressed() async {
     await showSaveGifDialog();
@@ -277,7 +363,10 @@ String updatedFiles = "$currentFiles${gifName.isNotEmpty ? ', $gifName' : ''}";
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                child: Text('Display GIF', style: TextStyle(fontSize: 17, color: Color.fromARGB(255, 62, 101, 120))),
+                child: Text('Display GIF',
+                    style: TextStyle(
+                        fontSize: 17,
+                        color: Color.fromARGB(255, 62, 101, 120))),
                 onPressed: onDisplayGifButtonPressed,
               ),
               Padding(
@@ -321,7 +410,10 @@ String updatedFiles = "$currentFiles${gifName.isNotEmpty ? ', $gifName' : ''}";
                 ),
               ),
               ElevatedButton(
-                child: Text('Display Selected', style: TextStyle(fontSize: 17, color: Color.fromARGB(255, 62, 101, 120))),
+                child: Text('Display Selected',
+                    style: TextStyle(
+                        fontSize: 17,
+                        color: Color.fromARGB(255, 62, 101, 120))),
                 onPressed: () => _showSelectedOption(context),
               ),
             ],

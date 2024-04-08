@@ -101,6 +101,7 @@ String updatedFiles = "$currentFiles${imageName.isNotEmpty ? ', $imageName' : ''
     } else {
       print('Request failed with status: ${response.statusCode}.');
     }
+    saveImage = false;
   }
 
     void sendDataToSendData() async {

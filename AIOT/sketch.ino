@@ -1,9 +1,3 @@
-// #include <Arduino.h>
-
-
-// #include <FS.h>
-// #include <SD.h>
-// #include <SPI.h>
 #include <Arduino.h>
 #include <Wire.h>
 

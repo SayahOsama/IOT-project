@@ -67,39 +67,7 @@ void setup() {
   isConnected = connectToWifi();
   if(isConnected){
       
-  
-
-  fconfig.api_key = API_KEY;
-  fconfig.database_url = DATABASE_URL;
-
-  if (Firebase.signUp(&fconfig, &auth, "", "")) {
-      Serial.println("ok");
-      signupOK = true;
-  }else {
-      Serial.printf("%s\n", fconfig.signer.signupError.message.c_str());
-      return;
-  }
-
-  fconfig.token_status_callback = tokenStatusCallback; 
-
-  Firebase.begin(&fconfig, &auth);
-  Firebase.reconnectWiFi(true);
-
-  if(!Firebase.RTDB.beginStream(&modefbdo,"/Mode")){
-    Serial.printf("stream i begin error, %s\n\n", modefbdo.errorReason().c_str());
-  }
-  if(!Firebase.RTDB.beginStream(&textfbdo,"/TextToShow")){
-    Serial.printf("stream i begin error, %s\n\n", textfbdo.errorReason().c_str());
-  }
-  if(!Firebase.RTDB.beginStream(&brightnessfbdo,"/Brightness")){
-    Serial.printf("stream i begin error, %s\n\n", brightnessfbdo.errorReason().c_str());
-  }    
-  if(!Firebase.RTDB.beginStream(&appConnectedfbdo,"/appConnected")){
-    Serial.printf("stream i begin error, %s\n\n", appConnectedfbdo.errorReason().c_str());
-  } 
-  if(!Firebase.RTDB.beginStream(&togglefbdo,"/switch")){
-    Serial.printf("stream i begin error, %s\n\n", togglefbdo.errorReason().c_str());
-  }
+  ApsSetup()
   }
   state = 11;
   currModule=Menu;
@@ -114,7 +82,6 @@ void loop() {
 // //SHOW TIME
   if(isConnected){
     runApp();
-    delay(1000);
   }
   if(on){
       runMen = MenuBegin();
@@ -130,6 +97,10 @@ void loop() {
           run_time_and_date();
         }
     }
-  
 }
+if(!isconnected){
+  connectToWifi();
+}
+}
+
    

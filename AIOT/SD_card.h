@@ -23,6 +23,73 @@ enum SD_RET{
 SD_RET CurrSDRet=SUCCESS;
 
 
+
+void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
+    Serial.printf("Listing directory: %s\n", dirname);
+
+    File root = fs.open(dirname);
+    if(!root){
+        Serial.println("Failed to open directory");
+        return;
+    }
+    if(!root.isDirectory()){
+        Serial.println("Not a directory");
+        return;
+    }
+
+    File file = root.openNextFile();
+    while(file){
+        if(file.isDirectory()){
+            Serial.print("  DIR : ");
+            Serial.println(file.name());
+            if(levels){
+                listDir(fs, file.path(), levels -1);
+            }
+        } else {
+            Serial.print("  FILE: ");
+            Serial.print(file.name());
+            Serial.print("  SIZE: ");
+            Serial.println(file.size());
+        }
+        file = root.openNextFile();
+    }
+}
+
+void createDir(fs::FS &fs, const char * path){
+    Serial.printf("Creating Dir: %s\n", path);
+    if(fs.mkdir(path)){
+        Serial.println("Dir created");
+    } else {
+        Serial.println("mkdir failed");
+    }
+}
+
+void removeDir(fs::FS &fs, const char * path){
+    Serial.printf("Removing Dir: %s\n", path);
+    if(fs.rmdir(path)){
+        Serial.println("Dir removed");
+    } else {
+        Serial.println("rmdir failed");
+    }
+}
+
+
+void writeFile(fs::FS &fs, const char * path, const char * message){
+    Serial.printf("Writing file: %s\n", path);
+
+    File file = fs.open(path, FILE_WRITE);
+    if(!file){
+        Serial.println("Failed to open file for writing");
+        return;
+    }
+    if(file.print(message)){
+        Serial.println("File written");
+    } else {
+        Serial.println("Write failed");
+    }
+    file.close();
+}
+
 SD_RET SDMount(){
   if(!SD.begin()){
     Serial.println("Card Mount Failed");
@@ -90,7 +157,6 @@ SD_RET SDSetUpInitial(){
     return ret;
 }
 
-
 void handleSDCardFail(SD_RET fail){
     switch (fail) {
     MOUNT_FAILED:
@@ -112,8 +178,8 @@ void handleSDCardFail(SD_RET fail){
     DIR_EMPTY:
       Serial.println("DIR_EMPTY");
       displayMessage("DIR EMPTY"); 
-          break;   
-      }
+        break;   
+  }
 
 }
 
@@ -145,8 +211,6 @@ bool CheckSDInsertion(){
     
 }
 
-
-
 void handleConfirmButtonSDcard() {
   Serial.println("***confirm***");
   currMode = toggledMod;
@@ -155,10 +219,10 @@ void handleConfirmButtonSDcard() {
 void handleNavigateButtonSDcard()  {
   if(toggledMod == sd_gifs){
     toggledMod = sd_images;
-    navigateText = "IMAGES";
+    navigateText = "IMAGE";
   }else {
     toggledMod = sd_gifs;
-    navigateText = "GIFS"; 
+    navigateText = " GIFS"; 
   }
   
   Serial.print("the new mod is ");
@@ -166,7 +230,6 @@ void handleNavigateButtonSDcard()  {
 
   
 }
-
 
 PressType handleAllButtonsInSDMode(){
   currPress = NoPress;
@@ -181,35 +244,6 @@ void displayNavigationMessageSDMode(String text){
   displayNavigationMessage(text,handleAllButtonsInSDMode);
 }
 
-
-
-void SDModeSetUp() {
-  Serial.println("got to sd setup");
-  toggledModl = SD_card;
-  toggledMod = sd_gifs;
-  navigateText = "GIFS";
-  SDSetUp();
-  if(CurrSDRet!=SUCCESS){
-    toggledMod=flash_gifs;
-    displayMessage("DISPLAYING DEFAULT");
-    //displayFromFlash();
-  }
-  SDCardPresent=true;
-  if(DirSetUp("/gifs") == SUCCESS){
-    GifsDirPresent=true;
-  }
-  if(DirSetUp("/images") == SUCCESS){
-    IamgesDirPresent=true;
-  }
-  Serial.print("IamgesDirPresent is  :");
-  Serial.print(IamgesDirPresent);
-  Serial.println();
-  Serial.print("GifsDirPresent is : ");
-  Serial.print(GifsDirPresent);
-  Serial.println();
-  Serial.println("done with sd setup");
-}
-  
 bool SDModeSDGifsValid(){
   CurrSDRet = DirSetUp("/gifs");
   if(CurrSDRet==SUCCESS){
@@ -228,54 +262,6 @@ bool SDModeSDImagesValid(){
   }
   IamgesDirPresent=false;
   return false;
-}
-
-bool SDModedisplayFromSDInSDMode( const char * dir){
-  return displayFromSD(dir,handleAllButtonsInSDMode); 
-}
-
-bool SDModebegin() {
-  Serial.print("*******got to sd begin *********");
-  currPress = NoPress;  
- if (GifsDirPresent && IamgesDirPresent) { 
-    //both exist
-    while(currPress != Confirm ){  
-      currPress = NoPress;
-      Serial.print("navigate text in sd begin is :  ");
-      Serial.print(navigateText);
-      Serial.println();
-      displayNavigationMessageSDMode(navigateText);
-    }
-  }
-  }else if (GifsDirPresent && !IamgesDirPresent) {
-          //play only gifs
-    while(currPress!=Confirm){
-      String text= (toggledMod == sd_gifs) ? "GIFS" : "NO IMAGES";
-      displayNavigationMessageSDMode(text);
-    }
-  }else if (!GifsDirPresent && IamgesDirPresent) {
-          //play only images
-    while(currPress!=Confirm){
-      String text= (toggledMod == sd_images) ? "NO GIFS" : "IMAGES";
-      displayNavigationMessageSDMode(text);
-    }
-  }else if(!GifsDirPresent && !IamgesDirPresent) {
-      //play from mem
-    toggledMod = flash_gifs;
-    currMode = toggledMod;
-    displayMessage("NO DIRS");
-    displayMessage("DISPLAYING DEFAULT");
-    //displayFromFlash(); 
-  }
-  Serial.println("******finished sd buttons********");
-  bool run=true;
-  while(run){
-    String strDir = (toggledMod == sd_images) ? "/images" : "/gifs" ;
-    const char* dir = strDir.c_str();
-    run = SDModedisplayFromSDInSDMode(dir);
-  }      
-  Serial.println("done with sd begin"); 
-  return true;
 }
 
 

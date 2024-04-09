@@ -4,45 +4,31 @@
 #include "config.h"
 #include "SD_card.h"
 
-Module InitCurrModule() { return Menu; }
-Mode InitcurrMode() { return sd_gifs;}
-Module InittoggledModl() { return Menu;}
-Mode InittoggledMod(){return sd_gifs;}
-bool InitSDCardPresent() { return false;}
-bool InitGifsDirPresent() { return false;}
-bool InitIamgesDirPresent() { return false;}
 
+/********************************menu sd*************************/
 
-Module currModule=Menu;
-Mode currMode=sd_gifs;
-Module toggledModl=Menu;
-Mode toggledMod=sd_gifs;
-bool SDCardPresent = false;
-bool GifsDirPresent = false;
-bool IamgesDirPresent = false;
-
-Global functions
+// Global functions
 void handleConfirmButtonTEST() {
-  currMode = toggledMod;
-  if( currMode == sd_gifs ){
-    navigateText = "IMAGES";
-  }else if( currMode == sd_images){
-    navigateText = "GIFS";
-  }
-  Serial.print(" ****confirmed mod in SD is  ");
-  Serial.print(navigateText);
-  Serial.println("****");
-  Serial.println();
+  // currMode = toggledMod;
+  // if( currMode == sd_gifs ){
+  //   navigateText = "IMAGES";
+  // }else if( currMode == sd_images){
+  //   navigateText = "GIFS";
+  // }
+  // Serial.print(" ****confirmed mod in SD is  ");
+  // Serial.print(navigateText);
+  // Serial.println("****");
+  // Serial.println();
 }
 
 void handleNavigateButtonTEST() {
     Serial.print("***got to navigate in SD***");
     if(toggledMod == sd_gifs){
         toggledMod = sd_images;
-        navigateText = "IMAGES";
+        navigateText = "IMAGE";
     }else {
         toggledMod = sd_gifs;
-        navigateText = "GIFS";
+        navigateText = " GIFS";
     }
 }
 
@@ -54,9 +40,8 @@ PressType handleAllButtonsInTEST() {
 void displayNavigationMessagTEST(String text) {
     displayNavigationMessage(text, handleAllButtonsInTEST);
 }
-
-
-/********************************************/
+////////////////////////////sd////////////////////
+/***********************menu menu*********************/
 void handleConfirmButtonDISPLAY() {
 
 }
@@ -65,10 +50,10 @@ void handleNavigationButtonDISPLAY() {
     Serial.print("***got to navigate in SD***");
     if(toggledMod == sd_gifs){
         toggledMod = sd_images;
-        navigateText = "IMAGES";
+        navigateText = "IMAGE";
     }else {
         toggledMod = sd_gifs;
-        navigateText = "GIFS";
+        navigateText = " GIFS";
     }
     currMode = toggledMod;
 }
@@ -78,6 +63,14 @@ PressType handleAllButtonsDISPLAY() {
     return pres;
 }
 
+bool SDstillThere(){
+  if(!SDSetUpSuccess()){
+    displayStaticMessage("SD FAIL");
+    SDCardPresent = false;
+    return false;
+  }
+  return true;
+}
 
 bool displayFromSD( const char * dir){
   Serial.println("got to display");
@@ -119,11 +112,17 @@ bool displayFromSD( const char * dir){
                 directory.close();
                 return true;
               }else if (currPress == OnOff){
+                currFile.close();
+                directory.close();
                 return false;
               }
+              // if(!SDstillThere()){
+              //   return false;
+              // }
           }
         }
         delay(5);
+        Serial.println("are we gettinr here");
         matrix.show();
         delay(100);
       }
@@ -143,13 +142,27 @@ bool SDModedisplayFromSDInTEST( const char * dir){
 
 
 
+bool sd_inserted = 0;
+
+void handleSDinsertion(){
+  if(SDSetUpSuccess()){
+    displayStaticMessage("SD INSERTED");
+    delay(5000);
+    matrix.clear();
+    matrix.show();
+    sd_inserted = true;
+    return;
+  }
+  return;
+}
+
 
 void handleConfirmButtonMenu() {
   currModule = toggledModl;
   if( currModule == SD_card ){
-    navigateText = "SD_card";
-  }else if( currModule == WiFiM){
-    navigateText = "WiFi";
+    navigateText = "  SD";
+  }else if( currModule == WiFiM){//
+    navigateText = "DATE";
   }
   Serial.print(" ****confirmed mod is  ");
   Serial.print(navigateText);
@@ -161,10 +174,10 @@ void handleNavigateButtonMenu() {
     Serial.print("***got to navigate in menu***");
     if(toggledModl == SD_card){
         toggledModl = WiFiM;
-        navigateText = "WiFiM";
+        navigateText = "DATE";
     }else {
         toggledModl = SD_card;
-        navigateText = "SD_card";
+        navigateText = "  SD";
     }
 }
 
@@ -177,12 +190,11 @@ void displayNavigationMessagMenu(String text) {
     displayNavigationMessage(text, handleAllButtonsInMenu);
 }
 
-
 void MenuSetUp() {
   // Serial.begin(115200);
   Serial.println("got to menu setup");
   toggledModl = SD_card;
-  navigateText = "SD CARD";
+  navigateText = "  SD";
   ///////////////////////////////////////////////
     Serial.println("got to sd setup");
     // toggledModl = SD_card;
@@ -192,7 +204,13 @@ void MenuSetUp() {
     if(CurrSDRet!=SUCCESS){
       toggledMod=flash_gifs;
       displayMessage("DISPLAYING DEFAULT");
-      //displayFromFlash();
+      while(!sd_inserted){
+        displayFromFlash();
+      }
+      if(sd_inserted){
+        SDSetUp();
+     }
+      
     }
     SDCardPresent=true;
     if(DirSetUp("/gifs") == SUCCESS){
@@ -210,21 +228,30 @@ void MenuSetUp() {
     Serial.println("done with sd setup");
 }
 
-
-
 bool MenuBegin() {
-  Serial.println();
+  //Serial.println();
   Serial.println("got to menu begin");
   currPress = NoPress;
+  displayStaticMessage(" MENU");
+  delay(5000);
+
+  matrix.clear();
   while(currPress !=Confirm ){  
     currPress = NoPress;
     Serial.print("current modle is: ");
     Serial.print(navigateText);
     Serial.println();
     displayNavigationMessagMenu(navigateText);
+
+  }
+  matrix.clear();
+  matrix.show();
+  if(currModule == WiFiM){
+    ///time and date
+    return true;
   }
   toggledMod = sd_gifs;
-  navigateText = "GIFS";
+  navigateText = " GIFS";
   currPress = NoPress;
   if(IamgesDirPresent && GifsDirPresent){
     while(currPress !=Confirm ){  
@@ -237,14 +264,14 @@ bool MenuBegin() {
   }else if (GifsDirPresent && !IamgesDirPresent) {
           //play only gifs
     while(currPress!=Confirm){
-      String text= (toggledMod == sd_gifs) ? "GIFS" : "NO IMAGES";
+      String text= (toggledMod == sd_gifs) ? " GIFS" : "NO IMAGE";
       displayNavigationMessageSDMode(text);
     }
 
     }else if (!GifsDirPresent && IamgesDirPresent) {
             //play only images
       while(currPress!=Confirm){
-        String text= (toggledMod == sd_images) ? "NO GIFS" : "IMAGES";
+        String text= (toggledMod == sd_images) ? "NO GIFS" : "IMAGE";
         displayNavigationMessageSDMode(text);
       }
     }else if(!GifsDirPresent && !IamgesDirPresent) {
@@ -256,12 +283,10 @@ bool MenuBegin() {
       //displayFromFlash(); 
     }
   Serial.println("******finished sd buttons********");
-  if(currModule == WiFiM){
-    ///time and date
-    return true;
-  }
+
   bool run=true;
-  
+  matrix.clear();
+  matrix.show();
   while(run){
     currPress = NoPress;
     String strDir = (toggledMod == sd_images) ? "/images" : "/gifs" ;
@@ -273,7 +298,8 @@ bool MenuBegin() {
       //matrix hvbeen turned of
       return false;
     }
-  }      
+  }
+  currModule == WiFiM;
   Serial.println("done with sd begin"); 
   return true;
 }

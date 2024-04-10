@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "278666888228",
+    "firebase_url": "https://esp32-connect-za-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "esp32-connect-za",
+    "storage_bucket": "esp32-connect-za.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278666888228:android:e45aecffc33b56143b04b1",
+        "android_client_info": {
+          "package_name": "com.example.iot_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFzgvPYtYCDC-8RNEKU4Cxcs07eg3XPfU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278666888228:android:19114fd2b4c352683b04b1",
+        "android_client_info": {
+          "package_name": "com.example.led_matrix"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFzgvPYtYCDC-8RNEKU4Cxcs07eg3XPfU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278666888228:android:2744733cddca78963b04b1",
+        "android_client_info": {
+          "package_name": "com.example.neo_matrix_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFzgvPYtYCDC-8RNEKU4Cxcs07eg3XPfU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

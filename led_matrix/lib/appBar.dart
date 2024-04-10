@@ -78,8 +78,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
         ),
       );
     } else {
-      databaseReference.child('Esp32Connected').set(true);
+      
     }
+    databaseReference.child('Esp32Connected').set(false);
   }
 
   @override

@@ -20,12 +20,12 @@ class _Page4State extends State<Page4> {
   String dropdownValue = 'None';
   List<String> fixedSet = [
     'None',
-    'Jump',
-    'Pickahu',
-    'Mario',
-    'PokeBall',
-    'Flower',
-    'Fish',
+    'cat',
+    'fire_mario',
+    'jump',
+    'kirby',
+    'mario',
+    'pikachu',
   ];
 
   bool saveGif = false;
@@ -150,7 +150,7 @@ class _Page4State extends State<Page4> {
   void _sendData(String data) async {
     try {
       await databaseReference.child('Mode').set(8);
-      await databaseReference.child('GifName').set("show$data");
+      await databaseReference.child('GifName').set("data");
     } catch (e) {
       print('Failed to update data: $e');
     }

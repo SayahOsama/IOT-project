@@ -46,26 +46,20 @@ void setup() {
   on = false;
   
   buttonsSetUp();
-  //delay(200);
 
   matrixSetUp();
 
   MenuSetUp();
-  Serial.print("Modle is ");
-  Serial.print(currModule);
   
-
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
   // Serial.println("after time config");
   currModule == Menu;
   isConnected = connectToWifi();
-  if(isConnected){
-      
-  ApsSetup()
+  if(isConnected){    
+    AppSetup()
   }
   state = 11;
   currModule=Menu;
-  //MenuBegin();
 
   Serial.println("done with set up");
 }
@@ -75,26 +69,24 @@ void loop() {
   handleOnOffButton();
 // //SHOW TIME
   if(isConnected){
-    runApp();
+    runApp();  
   }
   if(on){
-      runMen = MenuBegin();
-      if(!runMen){//matrix is off
-        setup();
-        handleOnOffButton();
-        return;
-      }
       if(runMen&& currModule == WiFiM){
         if(!isConnected){
           displayMessage("connect to wifi");
+         isConnected = connectToWifi();      
         }else{
           run_time_and_date();
         }
-    }
-}
-if(!isconnected){
-  connectToWifi();
-}
+    }else{
+        runMen = MenuBegin();
+        if(!runMen){//matrix is off
+          handleOnOffButton();
+          return;
+        }
+      }
+  }
 }
 
    

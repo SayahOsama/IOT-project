@@ -22,11 +22,6 @@
 #include "config.h"
 
 bool Appsetup() {
-    //Serial.begin(9600);
-  // if(!isConnected){
-  //     return false;
-  // }   
-
   fconfig.api_key = API_KEY;
   fconfig.database_url = DATABASE_URL;
 
@@ -311,6 +306,11 @@ void run_app_all_sd(){
 }
 
 void runApp() {
+ if(!isConnected){
+      return false;
+  }else{
+     Appsetup();
+ }
 
   checkRTDBUpdates();
   

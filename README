@@ -3,59 +3,34 @@
 This innovative LED Matrix project, developed by Zenab Asi, Osama Sayah, and Kareem Ismail, presents a dynamic platform for a multitude of applications including displaying text, images, GIFs, and real-time clock functionality.
 It's a fusion of hardware and software expertise that results in captivating visual experiences.
 
-## Features
-- displaying a menu which enables the user to chose between entring sd mode or wifi mode via navigating button and confirmation button.
-- in sd card mode the user can chose between displaying gifs or images from the sd card with the option to navigate through the dirctories via the navigation button.
-- when chosing sd option there is error handling mechanisim that displays the error on the matrix for instance if there is no sd card or no specifed dirictory or file.
-- in the case of chosing wifi mode Connect to Wi-Fi networks for Internet access.
-- Interact with Firebase RTDB for data synchronization.
-- display messages which are sent from the app to the matrix.
-- control the matrix display brightness via the app.
-- displaying time using Network Time Protocol (NTP).
-- Store data locally on an SD card (optional).
-- Upload GIFs from the app, which are sent and saved to the SD card.
-- Control the LED matrix display via the app or using physical buttons.
+Overview
+The LED Matrix project offers a comprehensive platform for dynamic content display and user interaction, combining hardware and software elements to create engaging visual experiences. Developed by Zenab Asi, Osama Sayah, and Kareem Ismail, this project leverages Arduino technology to control an LED matrix display, providing a wide range of functionalities for both standalone and connected operations.
 
-## Hardware Requirements
+Key Features
+Menu Navigation: Users can navigate through a menu system to choose between SD card mode and time & date mode, enabling flexible content display options.
 
-- Arduino development board (e.g., Arduino Uno, ESP32).
-- LED matrix display.
-- Pushbuttons or tactile switches for user input.
-- SD card module (optional).
-- Jumper wires and breadboard for connections.
-- Power supply for the Arduino board and LED matrix.
+SD Card Mode: In SD card mode, users can select between displaying GIFs or images stored on the SD card, with built-in error handling mechanisms to handle potential issues such as missing SD card or invalid directories/files.
 
-## Software Requirements
+Wi-Fi Connectivity: The project supports Wi-Fi connectivity for Internet access, allowing users to interact with Firebase RTDB for data synchronization, message display, and remote control capabilities.
 
-- Arduino IDE (Integrated Development Environment).
-- Necessary libraries for Wi-Fi connectivity, Firebase integration, LED matrix control, button handling, and SD card interfacing.
+App Integration: Users can interact with the LED matrix display via a companion mobile app, enabling features such as message display, brightness control, and GIF uploads for dynamic content creation.
 
-## Setup
+Real-time Clock: The project synchronizes time using Network Time Protocol (NTP), enabling accurate time and date display on the LED matrix.
 
-### Hardware Setup
+Local Data Storage: An optional feature allows users to store data locally on an SD card, providing additional storage capacity for GIFs, images, and other content.
 
-1. Connect the LED matrix display to the Arduino board following the wiring diagram.
-2. Wire the pushbuttons or tactile switches to the Arduino for user input.
-3. If using an SD card module, connect it to the Arduino board.
-4. Ensure all connections are secure and correctly made.
+Error Handling: Robust error handling mechanisms ensure smooth operation and user feedback in case of connectivity issues, SD card detection errors, or other potential issues.
 
-### Software Setup
+Physical Button Control: Physical buttons are integrated into the system, providing an alternative method for controlling the LED matrix display without relying on the app.
 
-1. Install the Arduino IDE on your computer if not already installed.
-2. Clone or download this repository to your local machine.
-3. Open the Arduino sketch file (.ino) in the Arduino IDE.
-4. Install the required libraries using the Arduino Library Manager.
-5. Configure Wi-Fi credentials and Firebase API key in the `config.h` file.
-6. Adjust any other configuration parameters as needed.
-7. Upload the sketch to your Arduino board.
+Project Structure
+The LED Matrix project consists of three main folders:
 
-## Usage
+LED Matrix Arduino Sketch (led_matrix): This folder contains the Arduino sketch files responsible for controlling the LED matrix display and coordinating various functionalities such as menu navigation, content display, and error handling.
 
-1. Power on the Arduino board and LED matrix display.
-2. The device will initialize and attempt to connect to the configured Wi-Fi network.
-3. Once connected, it will sign in to Firebase and begin syncing data with the RTDB.
-4. Use the pushbuttons or tactile switches to interact with the device and navigate through different modes and functionalities.
-5. Alternatively, control the LED matrix display via the app by uploading GIFs and sending commands to the device.
+App Development (app): The app folder houses the codebase for the companion mobile app, allowing users to interact with the LED matrix display remotely. The app facilitates features such as message sending, brightness adjustment, and GIF uploads.
+
+Python Server (python_server): Within the python_server folder, you'll find the code for a Python server responsible for converting GIFs to JSON format. This server-side component enhances the project's functionality by enabling seamless integration of GIFs into the LED matrix display.
 
 ## Error Handling
 
@@ -66,7 +41,7 @@ It's a fusion of hardware and software expertise that results in captivating vis
 - **SD Card Detection**: If no SD card is detected, the device will display a notification on the LED matrix and fall back to displaying images from flash memory.
 - **Library Errors**: If any required library is missing or encounters errors, the device will display an error message on the LED matrix and halt further execution.
 
-### `buttons.h`
+### `buttonstested.h`
 
 - **Button Handling**: Error handling for button inputs, ensuring that button presses are properly detected and processed.
 
@@ -81,17 +56,5 @@ It's a fusion of hardware and software expertise that results in captivating vis
 ### `sd_card.h`
 
 - **SD Card Interfacing**: Error handling for SD card detection and file operations, including fallback mechanisms if the SD card is not present or encounters errors.
-
-## Contributing
-
-Contributions to this project are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request.
-
-## License
-
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
-## libraries used :
-
-
 
 _____________________________________________________________________________________________________________________________
